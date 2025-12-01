@@ -1,10 +1,13 @@
+import Stripe from "stripe";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
 export default async function handler(req, res) {
-  // CORS HEADERS
+  // CORS
   res.setHeader("Access-Control-Allow-Origin", "https://www.audiorituals.io");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-  // Preflight
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
@@ -14,20 +17,36 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Webflow bazen JSON'u otomatik decode eder
-    const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+    const { trackId } = JSON.parse(req.body);
 
-    const { priceId, trackId } = body || {};
+    if (!trackId) {
+      return res.status(400).json({ error: "Track ID missing" });
+    }
 
-    return res.json({
+    // Webflow CMS’de kayıtlı fiyat ID’sini getiriyoruz
+    // Eğer Webflow’dan "Stripe Price ID" gönderiyorsan direkt kullanabiliriz
+    const priceId = trackId; // Eğer trackId = Stripe Price ID ise
+
+    // Stripe Checkout Session oluştur
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1
+        }
+      ],
+      success_url: "https://www.audiorituals.io/success",
+      cancel_url: "https://www.audiorituals.io/cancel",
+    });
+
+    return res.status(200).json({
       ok: true,
-      priceId,
-      trackId,
-      note: "Stripe henüz bağlanmadı"
+      url: session.url
     });
 
   } catch (err) {
-    console.error("Checkout error:", err);
-    return res.status(500).json({ error: "Server error", details: err.message });
+    console.error(err);
+    return res.status(500).json({ error: "Checkout error" });
   }
 }
