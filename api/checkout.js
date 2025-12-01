@@ -1,58 +1,75 @@
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-
 export default async function handler(req, res) {
-  // --- GLOBAL CORS ---
-  res.setHeader("Access-Control-Allow-Origin", "https://www.audiorituals.io");
+  // --- 1. Dinamik CORS Ayarı ---
+  // Gelen isteğin origin'ini al, izin verilenlerden biri mi kontrol et
+  const allowedOrigins = [
+    "https://www.audiorituals.io",
+    "https://audiorituals.io",
+    "https://audio-rituals.design.webflow.io" // Webflow staging domainin (tahmini)
+  ];
+  
+  const origin = req.headers.origin;
+  
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  } else {
+    // Test aşamasında kolaylık olsun diye şimdilik herkese izin verelim (Sonra kapatırsın)
+    res.setHeader("Access-Control-Allow-Origin", "*");
+  }
+  
   res.setHeader("Access-Control-Allow-Methods", "OPTIONS, POST");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-  // --- OPTIONS preflight isteğini hemen döndür ---
+  // --- 2. OPTIONS İsteğini Karşıla ---
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
 
-  // --- Sadece POST izin ver ---
+  // --- 3. Method Kontrolü ---
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Only POST allowed" });
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
-    // Body parse (Vercel bazen string bazen object gönderir)
-    const body =
-      typeof req.body === "string" && req.body.length > 0
-        ? JSON.parse(req.body)
-        : req.body;
+    // --- 4. Stripe Key Kontrolü ---
+    if (!process.env.STRIPE_SECRET_KEY) {
+      throw new Error("STRIPE_SECRET_KEY is missing in Vercel Environment Variables");
+    }
 
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+    const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
     const trackId = body?.trackId;
 
     if (!trackId) {
-      return res.status(400).json({ error: "Track ID missing" });
+      return res.status(400).json({ error: "Track ID missing in request body" });
     }
 
-    // Webflow'da Track ID = Stripe Price ID
-    const priceId = trackId;
+    console.log("Creating session for:", trackId); // Loglara yazdırmak debug için iyidir
 
-    // Stripe Checkout session
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       line_items: [
         {
-          price: priceId,
+          price: trackId,
           quantity: 1,
         },
       ],
-      success_url: "https://www.audiorituals.io/success",
-      cancel_url: "https://www.audiorituals.io/cancel",
+      success_url: "https://www.audiorituals.io/success", // Webflow'da bu sayfayı yaptığından emin ol
+      cancel_url: "https://www.audiorituals.io", // İptal ederse ana sayfaya dönsün
     });
 
-    return res.status(200).json({
-      ok: true,
-      url: session.url,
-    });
+    return res.status(200).json({ url: session.url });
+
   } catch (err) {
-    console.error("CHECKOUT ERROR:", err);
-    return res.status(500).json({ error: "Checkout error" });
+    // Vercel Loglarına hatayı detaylı yazdır
+    console.error("DETAILED ERROR:", err.message);
+    
+    // Frontend'e de hatayı (güvenli şekilde) dön
+    return res.status(500).json({ 
+      error: "Checkout failed", 
+      details: err.message 
+    });
   }
 }
