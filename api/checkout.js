@@ -1,58 +1,31 @@
+// checkout.js dosyasını BAŞTAN düzenleyin
+
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-
 export default async function handler(req, res) {
-  // --- GLOBAL CORS ---
-  res.setHeader("Access-Control-Allow-Origin", "https://www.audiorituals.io");
-  res.setHeader("Access-Control-Allow-Methods", "OPTIONS, POST");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    // --- 1. KOD: Sadece CORS Başlıklarını Buraya Koyun ---
+    res.setHeader("Access-Control-Allow-Origin", "https://www.audiorituals.io"); 
+    res.setHeader("Access-Control-Allow-Methods", "OPTIONS, POST");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-  // --- OPTIONS preflight isteğini hemen döndür ---
-  if (req.method === "OPTIONS") {
-    return res.status(200).end();
-  }
-
-  // --- Sadece POST izin ver ---
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Only POST allowed" });
-  }
-
-  try {
-    // Body parse (Vercel bazen string bazen object gönderir)
-    const body =
-      typeof req.body === "string" && req.body.length > 0
-        ? JSON.parse(req.body)
-        : req.body;
-
-    const trackId = body?.trackId;
-
-    if (!trackId) {
-      return res.status(400).json({ error: "Track ID missing" });
+    // --- 2. OPTIONS preflight isteğini hemen döndür ---
+    if (req.method === "OPTIONS") {
+        return res.status(200).end();
     }
+    
+    // --- Diğer kodlar burada başlar ---
+    if (req.method !== "POST") {
+        return res.status(405).json({ error: "Only POST allowed" });
+    }
+    
+    // Stripe objesi artık try bloğundan önce, handler içinde başlatılıyor
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY); 
 
-    // Webflow'da Track ID = Stripe Price ID
-    const priceId = trackId;
-
-    // Stripe Checkout session
-    const session = await stripe.checkout.sessions.create({
-      mode: "payment",
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
-      success_url: "https://www.audiorituals.io/success",
-      cancel_url: "https://www.audiorituals.io/cancel",
-    });
-
-    return res.status(200).json({
-      ok: true,
-      url: session.url,
-    });
-  } catch (err) {
-    console.error("CHECKOUT ERROR:", err);
-    return res.status(500).json({ error: "Checkout error" });
-  }
+    try {
+        // ... kodun geri kalanı ...
+        
+        // ... session oluşturma ve yanıt dönme ...
+    } catch (err) {
+        // ... hata yakalama ...
+    }
 }
