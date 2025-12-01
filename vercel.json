@@ -1,0 +1,13 @@
+// Projenizin kök (root) dizininde olmalı
+{
+  "headers": [
+    {
+      "source": "/api/checkout",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "https://www.audiorituals.io" },
+        { "key": "Access-Control-Allow-Methods", "value": "OPTIONS, POST" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type" }
+      ]
+    }
+  ]
+}
