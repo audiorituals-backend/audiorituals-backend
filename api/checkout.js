@@ -3,32 +3,33 @@ import Stripe from "stripe";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export default async function handler(req, res) {
-  // CORS
+  // --- GLOBAL CORS ---
   res.setHeader("Access-Control-Allow-Origin", "https://www.audiorituals.io");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
+  // OPTIONS preflight isteğini HEMEN cevapla
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
 
+  // Sadece POST'a izin ver
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Only POST allowed" });
   }
 
   try {
-    // ⭐ Webflow bazen JSON, bazen object gönderir.
+    // Body parse (Webflow bazen JSON string gönderiyor)
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
 
     const trackId = body.trackId;
-
     if (!trackId) {
       return res.status(400).json({ error: "Track ID missing" });
     }
 
-    const priceId = trackId;
+    const priceId = trackId; // Webflow'da Track ID = Stripe Price ID
 
-    // Stripe Checkout oluştur
+    // Stripe Checkout
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       line_items: [
