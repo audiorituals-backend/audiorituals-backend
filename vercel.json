@@ -1,7 +1,7 @@
 {
   "headers": [
     {
-      "source": "/api/(.*)", // Tüm /api yollarını kapsa
+      "source": "/api/(.*)", 
       "headers": [
         { "key": "Access-Control-Allow-Credentials", "value": "true" },
         { "key": "Access-Control-Allow-Origin", "value": "https://www.audiorituals.io" },
