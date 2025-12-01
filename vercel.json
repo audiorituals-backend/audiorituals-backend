@@ -1,10 +1,11 @@
 {
   "headers": [
     {
-      "source": "/api/checkout",
+      "source": "/api/(.*)", // Tüm /api yollarını kapsa
       "headers": [
+        { "key": "Access-Control-Allow-Credentials", "value": "true" },
         { "key": "Access-Control-Allow-Origin", "value": "https://www.audiorituals.io" },
-        { "key": "Access-Control-Allow-Methods", "value": "OPTIONS, POST" },
+        { "key": "Access-Control-Allow-Methods", "value": "OPTIONS, POST, GET" },
         { "key": "Access-Control-Allow-Headers", "value": "Content-Type" }
       ]
     }
