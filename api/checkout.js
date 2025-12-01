@@ -17,24 +17,25 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { trackId } = JSON.parse(req.body);
+    // ⭐ Webflow bazen JSON, bazen object gönderir.
+    const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+
+    const trackId = body.trackId;
 
     if (!trackId) {
       return res.status(400).json({ error: "Track ID missing" });
     }
 
-    // Webflow CMS’de kayıtlı fiyat ID’sini getiriyoruz
-    // Eğer Webflow’dan "Stripe Price ID" gönderiyorsan direkt kullanabiliriz
-    const priceId = trackId; // Eğer trackId = Stripe Price ID ise
+    const priceId = trackId;
 
-    // Stripe Checkout Session oluştur
+    // Stripe Checkout oluştur
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       line_items: [
         {
           price: priceId,
-          quantity: 1
-        }
+          quantity: 1,
+        },
       ],
       success_url: "https://www.audiorituals.io/success",
       cancel_url: "https://www.audiorituals.io/cancel",
@@ -42,11 +43,11 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       ok: true,
-      url: session.url
+      url: session.url,
     });
 
   } catch (err) {
-    console.error(err);
+    console.error("CHECKOUT ERROR:", err);
     return res.status(500).json({ error: "Checkout error" });
   }
 }
