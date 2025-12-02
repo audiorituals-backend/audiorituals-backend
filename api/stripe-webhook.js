@@ -79,7 +79,7 @@ export default async function handler(req, res) {
     const downloadUrl = await getSignedUrl(r2, command, { expiresIn: 21600 });
 
     await resend.emails.send({
-      from: "Audio Rituals <noreply@audiorituals.io>",
+      from: "Audio Rituals <onboarding@resend.dev>",
       to: customerEmail,
       subject: "Your download is ready",
       html: `
