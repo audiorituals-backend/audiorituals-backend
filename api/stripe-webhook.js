@@ -60,8 +60,8 @@ export default async function handler(req, res) {
     console.log("Purchased Price ID:", priceId);
 
     const productFiles = {
-      "price_1SYN6O5PSxWy982NN4qY1tCQ": "Q-Verb-Mini.zip",
-      "price_1SYN4V5PSxWy982NoG8RIfm7": "Q-Attenuation.zip"
+      "price_1SZpfp5PSxWy982NJ3mXWVOH": "Q-Verb-Mini.zip",
+      "price_1SZpe45PSxWy982NMK8jmatt": "Q-Attenuation.zip"
     };
 
     const fileName = productFiles[priceId];
@@ -79,7 +79,7 @@ export default async function handler(req, res) {
     const downloadUrl = await getSignedUrl(r2, command, { expiresIn: 21600 });
 
     await sgMail.send({
-      from: "Audio Rituals <audioritualsyedek@gmail.com>",
+      from: "audioritualsyedek@gmail.com",
       to: customerEmail,
       subject: "Your download is ready",
       html: `
