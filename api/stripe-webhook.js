@@ -60,8 +60,8 @@ export default async function handler(req, res) {
     console.log("Purchased Price ID:", priceId);
 
     const productFiles = {
-      "price_1SZpfp5PSxWy982NJ3mXWVOH": "TiklaKazan01.zip",
-      "price_1SZpe45PSxWy982NMK8jmatt": "TiklaKazan01.zip"
+      "price_1SZpfp5PSxWy982NJ3mXWVOH": "Q-Verb-Mini.zip",
+      "price_1SZpe45PSxWy982NMK8jmatt": "Q-Attenuation-Occlusion.zip"
     };
 
     const fileName = productFiles[priceId];
