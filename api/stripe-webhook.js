@@ -1,5 +1,5 @@
 import Stripe from 'stripe';
-import { Resend } from 'resend';
+import sgMail from "@sendgrid/mail";
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
@@ -10,7 +10,7 @@ export const config = {
 };
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-const resend = new Resend(process.env.RESEND_API_KEY);
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const r2 = new S3Client({
   region: "auto",
@@ -78,8 +78,8 @@ export default async function handler(req, res) {
 
     const downloadUrl = await getSignedUrl(r2, command, { expiresIn: 21600 });
 
-    await resend.emails.send({
-      from: "Audio Rituals <onboarding@resend.dev>",
+    await sgMail.send({
+      from: "Audio Rituals <audioritualsyedek@gmail.com>",
       to: customerEmail,
       subject: "Your download is ready",
       html: `
