@@ -46,17 +46,19 @@ export default async function handler(req, res) {
 
         // --- 5. Stripe Checkout Session Oluşturma ---
         const session = await stripe.checkout.sessions.create({
-            mode: "payment",
-            line_items: [
-                {
-                    price: priceId, // Webflow'dan gelen Price ID
-                    quantity: 1,
-                },
-            ],
-            success_url: "https://www.audiorituals.io/success",
-            cancel_url: "https://www.audiorituals.io/cancel",
-            // İsteğe bağlı: customer_email: '{{CHECKOUT_SESSION_ID}}'
-        });
+  mode: "payment",
+  line_items: [
+    {
+      price: priceId,
+      quantity: 1,
+    },
+  ],
+  metadata: {
+    priceId: priceId, // 👈 BU ŞART
+  },
+  success_url: "https://www.audiorituals.io/success",
+  cancel_url: "https://www.audiorituals.io/cancel",
+});
 
         // Başarılı yanıt, kullanıcıyı Stripe'a yönlendirir
         return res.status(200).json({
