@@ -47,7 +47,7 @@ export default async function handler(req, res) {
 
     // DİKKAT: Artık doğrudan downloadUrl oluşturmuyoruz.
     // Kullanıcıyı Webflow'daki indirme sayfasına, session ID ile gönderiyoruz.
-    const webflowDownloadUrl = `https://audiorituals.com/download?sid=${session.id}`;
+    const webflowDownloadUrl = `https://audiorituals.io/download?sid=${session.id}`;
 
     await sgMail.send({
       from: "audioritualsyedek@gmail.com",
