@@ -1,7 +1,5 @@
 import Stripe from 'stripe';
 import sgMail from "@sendgrid/mail";
-import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 export const config = {
   api: {
@@ -12,15 +10,6 @@ export const config = {
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-const r2 = new S3Client({
-  region: "auto",
-  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-  credentials: {
-    accessKeyId: process.env.R2_ACCESS_KEY_ID,
-    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
-  },
-});
- 
 function buffer(readable) {
   return new Promise((resolve, reject) => {
     const chunks = [];
@@ -52,47 +41,37 @@ export default async function handler(req, res) {
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
-
     const customerEmail = session.customer_details?.email;
-    const priceId = session.metadata?.priceId;
 
     console.log("Payment completed by:", customerEmail);
-    console.log("Purchased Price ID:", priceId);
 
-    const productFiles = {
-      "price_1SZpfp5PSxWy982NJ3mXWVOH": "Q-Verb-Mini.zip",
-      "price_1SZpe45PSxWy982NMK8jmatt": "Q-Attenuation-Occlusion.zip"
-    };
-
-    const fileName = productFiles[priceId];
-
-    if (!fileName) {
-      console.log("Unknown priceId:", priceId);
-      return res.status(200).json({ received: true });
-    }
-
-    const command = new GetObjectCommand({
-      Bucket: process.env.R2_BUCKET,
-      Key: fileName,
-    });
-
-    const downloadUrl = await getSignedUrl(r2, command, { expiresIn: 21600 });
+    // DİKKAT: Artık doğrudan downloadUrl oluşturmuyoruz.
+    // Kullanıcıyı Webflow'daki indirme sayfasına, session ID ile gönderiyoruz.
+    const webflowDownloadUrl = `https://audiorituals.com/download?sid=${session.id}`;
 
     await sgMail.send({
       from: "audioritualsyedek@gmail.com",
       to: customerEmail,
-      subject: "Your download is ready",
+      subject: "Your Audio Rituals download is ready",
       html: `
-        <p>Hello,</p>
-        <p>Thank you for your purchase! You can download your product using the link below:</p>
-        <p><a href="${downloadUrl}">Download Product</a></p>
-        <p>This link will expire in 6 hours.</p>
-        <br>
-        <p>Audio Rituals</p>
+        <div style="font-family: sans-serif; line-height: 1.6;">
+          <h2>Thank you for your purchase!</h2>
+          <p>Hello,</p>
+          <p>To access your products, please click the button below and verify your purchase email on the download page:</p>
+          <p style="margin: 30px 0;">
+            <a href="${webflowDownloadUrl}" 
+               style="background-color: #000; color: #fff; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+               Go to Download Page
+            </a>
+          </p>
+          <p>This link is permanent, you can use it whenever you need to download your files again.</p>
+          <br>
+          <p>Best regards,<br>Audio Rituals Team</p>
+        </div>
       `,
     });
 
-    console.log("Download email sent to:", customerEmail);
+    console.log("Download page link sent to:", customerEmail);
   }
 
   res.status(200).json({ received: true });
