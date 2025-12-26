@@ -45,6 +45,7 @@ export default async function handler(req, res) {
     const productFiles = {
       "price_1SZpfp5PSxWy982NJ3mXWVOH": "Q-Verb-Mini.zip",
       "price_1SZpe45PSxWy982NMK8jmatt": "Q-Attenuation-Occlusion.zip"
+      "price_1Sijp85PSxWy982NPIrfsHHr": "Dantes-Inferno-Layer-I-Limbo-Sound-Collection-by-Audio-Rituals.zip"
     };
 
     const fileName = productFiles[priceId];
