@@ -1,6 +1,7 @@
 {
   "name": "audiorituals-backend",
   "version": "1.0.0",
+  "type": "module",
   "description": "Vercel backend for audiorituals",
   "dependencies": {
     "stripe": "^14.x.x",
