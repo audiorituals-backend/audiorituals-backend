@@ -56,7 +56,7 @@ export default async function handler(req, res) {
   metadata: {
     priceId: priceId, 
   },
-  success_url: "https://www.audiorituals.io/success?session_id={CHECKOUT_SESSION_ID}",
+  success_url: "https://www.audiorituals.io/success?session_id={CHECKOUT_SESSION_ID}&email={CHECKER_CUSTOMER_EMAIL}",
   cancel_url: "https://www.audiorituals.io/cancel?session_id={CHECKOUT_SESSION_ID}",
 });
 
