@@ -13,17 +13,15 @@ const r2 = new S3Client({
 });
 
 export default async function handler(req, res) {
-  // --- CORS AYARI BAŞLANGIÇ ---
+  // --- CORS AYARI ---
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*'); 
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
 
   if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
+    return res.status(200).end();
   }
-  // --- CORS AYARI BİTİŞ ---
 
   if (req.method !== 'POST') {
     return res.status(405).json({ error: "Method not allowed" });
@@ -35,8 +33,8 @@ export default async function handler(req, res) {
     // 1. Stripe'tan bu oturumu çek
     const session = await stripe.checkout.sessions.retrieve(sessionId);
     
-    // 2. Güvenlik: Girilen mail ile satın alan mail uyuşuyor mu?
-    if (session.customer_details.email.toLowerCase() !== email.toLowerCase()) {
+    // 2. Güvenlik Kontrolü
+    if (!session || session.customer_details.email.toLowerCase() !== email.toLowerCase()) {
       return res.status(403).json({ error: "Email mismatch! Please use the email you used during checkout." });
     }
 
@@ -44,7 +42,7 @@ export default async function handler(req, res) {
     const priceId = session.metadata?.priceId;
     const productFiles = {
       "price_1SZpfp5PSxWy982NJ3mXWVOH": "Q-Verb-Mini.zip",
-      "price_1SZpe45PSxWy982NMK8jmatt": "Q-Attenuation-Occlusion.zip"
+      "price_1SZpe45PSxWy982NMK8jmatt": "Q-Attenuation-Occlusion.zip", // Virgül eksikti, eklendi
       "price_1Sijp85PSxWy982NPIrfsHHr": "Dantes-Inferno-Layer-I-Limbo-Sound-Collection-by-Audio-Rituals.zip"
     };
 
@@ -58,16 +56,16 @@ export default async function handler(req, res) {
     // 4. R2'den imzalı (geçici) linki oluştur
     const command = new GetObjectCommand({
       Bucket: process.env.R2_BUCKET,
-      Key: fileName, // R2'deki gerçek dosya adı
+      Key: fileName,
     });
 
-    const url = await getSignedUrl(r2, command, { expiresIn: 3600 }); // 1 saat geçerli link
+    const url = await getSignedUrl(r2, command, { expiresIn: 3600 }); 
     
-    // 5. Linki Webflow'a geri gönder
-    res.status(200).json({ downloadUrl: url });
+    // 5. Linki geri gönder
+    return res.status(200).json({ downloadUrl: url });
 
   } catch (err) {
     console.error("Verification error:", err.message);
-    res.status(500).json({ error: "Verification failed or invalid Session ID." });
+    return res.status(500).json({ error: "Verification failed or invalid Session ID." });
   }
 }
