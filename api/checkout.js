@@ -45,7 +45,7 @@ export default async function handler(req, res) {
         const priceId = trackId; 
 
         // --- 5. Stripe Checkout Session Oluşturma ---
-        const session = await stripe.checkout.sessions.create({
+       const session = await stripe.checkout.sessions.create({
   mode: "payment",
   line_items: [
     {
@@ -54,10 +54,10 @@ export default async function handler(req, res) {
     },
   ],
   metadata: {
-    priceId: priceId, // 👈 BU ŞART
+    priceId: priceId, 
   },
-  success_url: "https://www.audiorituals.io/success",
-  cancel_url: "https://www.audiorituals.io/cancel",
+  success_url: "https://www.audiorituals.io/success?session_id={CHECKOUT_SESSION_ID}",
+  cancel_url: "https://www.audiorituals.io/cancel?session_id={CHECKOUT_SESSION_ID}",
 });
 
         // Başarılı yanıt, kullanıcıyı Stripe'a yönlendirir
