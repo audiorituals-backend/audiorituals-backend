@@ -12,19 +12,18 @@ export default async function handler(req, res) {
 
     try {
         const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
-        const { trackId, email } = body; 
+        const trackId = body?.trackId;
 
-        // Mail veya Track ID yoksa hata döndür (Zorunluluk burada)
-        if (!trackId || !email) {
-            return res.status(400).json({ error: "Track ID or Email missing in request body." });
+        if (!trackId) {
+            return res.status(400).json({ error: "Track ID missing" });
         }
 
         const session = await stripe.checkout.sessions.create({
             mode: "payment",
-            customer_email: email,
             line_items: [{ price: trackId, quantity: 1 }],
             metadata: { priceId: trackId },
-            success_url: `https://www.audiorituals.io/success?session_id={CHECKOUT_SESSION_ID}&email=${encodeURIComponent(email)}`,
+            // DÜZELTME: Maili buradan siliyoruz çünkü en başta sormuyoruz
+            success_url: `https://www.audiorituals.io/success?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `https://www.audiorituals.io/cancel`,
         });
 
