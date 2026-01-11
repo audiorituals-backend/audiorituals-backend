@@ -41,9 +41,9 @@ export default async function handler(req, res) {
     // 3. Metadata içindeki priceId'yi kullanarak doğru dosyayı bul
     const priceId = session.metadata?.priceId;
     const productFiles = {
-      "price_1SZpfp5PSxWy982NJ3mXWVOH": "Q-Verb-Mini.zip",
-      "price_1SZpe45PSxWy982NMK8jmatt": "Q-Attenuation-Occlusion.zip", // Virgül eksikti, eklendi
-      "price_1Sijp85PSxWy982NPIrfsHHr": "Dantes-Inferno-Layer-I-Limbo-Sound-Collection-by-Audio-Rituals.zip"
+      "price_1SYN6O5PSxWy982NN4qY1tCQ": "Q-Verb-Mini.zip",
+      "price_1SYN4V5PSxWy982NoG8RIfm7": "Q-Attenuation-Occlusion.zip", // Virgül eksikti, eklendi
+      "price_1SijwA5PSxWy982Ny0PJwVYd": "Dantes-Inferno-Layer-I-Limbo-Sound-Collection-by-Audio-Rituals.zip"
     };
 
     const fileName = productFiles[priceId];
