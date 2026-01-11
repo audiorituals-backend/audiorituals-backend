@@ -50,7 +50,7 @@ export default async function handler(req, res) {
     const webflowDownloadUrl = `https://audiorituals.io/download?sid=${session.id}`;
 
     await sgMail.send({
-      from: "audioritualsyedek@gmail.com",
+      from: "support@audiorituals.io",
       to: customerEmail,
       subject: "Your Audio Rituals download is ready",
       html: `
