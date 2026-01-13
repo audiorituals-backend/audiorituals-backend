@@ -1,7 +1,14 @@
 import Stripe from "stripe";
 
 export default async function handler(req, res) {
-    res.setHeader("Access-Control-Allow-Origin", "https://www.audiorituals.io");
+    // Dinamik CORS Ayarı
+    const allowedOrigins = ["https://www.audiorituals.io", "https://audiorituals.io"];
+    const origin = req.headers.origin;
+
+    if (allowedOrigins.includes(origin)) {
+        res.setHeader("Access-Control-Allow-Origin", origin);
+    }
+    
     res.setHeader("Access-Control-Allow-Methods", "OPTIONS, POST");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
@@ -22,7 +29,6 @@ export default async function handler(req, res) {
             mode: "payment",
             line_items: [{ price: trackId, quantity: 1 }],
             metadata: { priceId: trackId },
-            // DÜZELTME: Maili buradan siliyoruz çünkü en başta sormuyoruz
             success_url: `https://www.audiorituals.io/success?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `https://www.audiorituals.io/cancel`,
         });
